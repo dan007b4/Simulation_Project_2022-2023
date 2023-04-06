@@ -198,6 +198,176 @@ public class Personnel {
         return (int) x-1;
     }
 
+    public void initialize_functions(){
+
+        /* PUT ALL VARIABLES TO ZERO */
+
+        /* INPUT DATA RELATED TO RADIOLOGY DPT */
+        nrStations = 0;
+
+        for (i1 = 0; i1 < maxNrStations; i1++)
+            nrServersPerStation[i1] = 0;
+
+        /* INPUT DATA RELATED TO SYSTEM JOBS */
+        nrJobTypes = 0;
+
+
+        for (i2 = 0; i2 < maxNrJobTypes; i2++)
+        {   nrWorkstationsPerJobType[i2] = 0;
+            for (i1 = 0; i1 < maxNrStations; i1++)
+                route[i2][i1] = 0;
+        }
+        for (i1 = 0; i1 < maxC; i1++)
+            currentStation[i1] = 0;
+
+        /* GENERAL DISCRETE EVENT SIMULATION PARAMETERS */
+
+        t = 0;
+        N = 0;
+
+        /* VARIABLES RELATED TO system SCANS */
+        n = 0;
+        for (i1 = 0; i1 < maxNrStations; i1++)
+            nWS[i1] = 0;
+
+        for(i2 = 0; i2 < maxRun; i2++)
+        {   meanCustomersSystem[i2] = 0;
+            totN[i2] = 0;
+            for (i1 = 0; i1 < maxNrStations; i1++)
+                totNWS[i2][i1] = 0;
+        }
+
+        /* PARAMETERS RELATED TO ARRIVAL OF SCANS */
+        nrArrivalSources = 0;
+        nA = 0;
+        firstTA = 0;
+        indexArr = 0;
+        tLambda = 0;
+
+        for (i1 = 0; i1 < maxNrStations; i1++)
+            nAWS[i1] = 0;
+
+        for(i2 = 0; i2 < maxRun; i2++)
+        {   meanInterarrivalTime[i2] = 0;
+            for (i6 = 0; i6 < maxAS; i6++)
+                totLambda[i2][i6] = 0;
+
+
+            for (i3 = 0; i3 < maxC; i3++)
+            {    timeArrival[i2][i3] = 0;
+                for (i1 = 0; i1 < maxNrStations; i1++)
+                    timeArrivalWS[i2][i1][i3] = 0;
+
+            }
+        }
+        for (i3 = 0; i3 < maxC; i3++)
+        {   scanType[i3] = 0;
+        }
+
+
+        for (i6 = 0; i6 < maxAS; i6++)
+        {   tA[i6] = 0;
+            lambda[i6] = 0;
+            for (i3 = 0; i3 < maxNrJobTypes; i3++)
+                cumDistrScans[i6][i3] = 0;
+
+        }
+
+        /* PARAMETERS RELATED TO Processing OF SCANS */
+
+        for (i1 = 0; i1 < maxNrStations; i1++)
+        {   nDWS[i1] = 0;
+            for (i3 = 0; i3 < maxNrJobTypes; i3++)
+            {   mu[i1][i3] = 0;
+                var[i1][i3] = 0;
+                sigma[i1][i3] = 0;
+            }
+            for (i6 = 0; i6 < maxS; i6++)
+            {   tD[i1][i6] = 0;
+                currentCust[i1][i6] = 0;
+            }
+            for (i6 = 0; i6 < maxC; i6++)
+                listScan[i1][i6] = -1;
+
+        }
+        nD = 0;
+        firstTD = 0;
+        indexDepStation = 0;
+        indexDepServer = 0;
+        tMu = 0;
+
+        for(i2 = 0; i2 < maxRun; i2++)
+        {   meanServiceTime[i2] = 0;
+            totMu[i2] = 0;
+            for (i1 = 0; i1 < maxNrStations; i1++)
+            {   for (i3 = 0; i3 < maxC; i3++)
+                timeService[i2][i1][i3] = 0;
+
+
+            }
+        }
+        /* PARAMETERS RELATED TO waiting OF SCANS */
+
+        for(i2 = 0; i2 < maxRun; i2++)
+        {
+            meanWaitingTime[i2] = 0;
+            waitingTime[i2] = 0;
+            meanCustomersQueue[i2] = 0;
+            totNQueue[i2] = 0;
+            for (i1 = 0; i1 < maxNrStations; i1++)
+            {   totNQueueWS[i2][i1] = 0;
+                for (i3 = 0; i3 < maxC; i3++)
+                    waitingTimeJobWS[i2][i1][i3] = 0;
+            }
+        }
+
+
+        /* VARIABLES RELATED TO Processed SCANS */
+
+        for(i2 = 0; i2 < maxRun; i2++)
+        {   meanSystemTime[i2] = 0;
+            for (i3 = 0; i3 < maxC; i3++)
+            {   timeDeparture[i2][i3] = 0;
+                timeSystem[i2][i3] = 0;
+
+                for (i1 = 0; i1 < maxNrStations; i1++)
+                {
+                    timeDepartureWS[i2][i1][i3] = 0;
+                    timeSystemJobWS[i2][i1][i3] = 0;
+                }
+            }
+        }
+
+        for (i3 = 0; i3 < maxC; i3++)
+        {   orderOut[i3] = 0;
+
+        }
+
+        /* OTHER PARAMETERS */
+        infinity = 0;
+
+        for(i2 = 0; i2 < maxRun; i2++)
+        {
+            for (i3 = 0; i3 < maxNrStations; i3++)
+            {
+
+                for (i1 = 0; i1 < maxS; i1++)
+                {
+                    idle[i2][i3][i1] = 0;
+                }
+            }
+        }
+        rho = 0;
+        for (i3 = 0; i3 < maxNrStations; i3++)
+        {   rhoWS[i3] = 0;
+
+            for (i1 = 0; i1 < maxS; i1++)
+            {
+                rhoWSS[i3][i1] = 0;
+            }
+        }
+    }
+
 
     public static void main(String[] args) {
 	// write your code here
