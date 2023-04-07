@@ -1,4 +1,7 @@
 package com.company;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.File;
 import java.util.Random;
 
 public class Personnel {
@@ -371,7 +374,7 @@ public class Personnel {
     public Personnel() {
     }
 
-    public void procedure(){
+    public void procedure() throws IOException {
         L = 1;
         for (i3 = 0; i3 < L; i3++)                          // Count number of runs
         {   K = 1;
@@ -530,7 +533,7 @@ public class Personnel {
         /* DETERMINE FIRST ARRIVAL + FIRST DEPARTURE */
         for (i2 = 0; i2 < maxNrStations; i2++)
         {   for (i1 = 0; i1 < maxS; i1++)
-            tD[i2][i1] =infinity;          // Put all departure times for all servers to +infty (system is idle and no departures have been scheduled yet
+            tD[i2][i1] = infinity;          // Put all departure times for all servers to + infinity (system is idle and no departures have been scheduled yet)
         }
 
         for (i1 = 0; i1 < nrArrivalSources; i1++)
@@ -813,14 +816,67 @@ public class Personnel {
     }
 
     public void departureEvent(){
-
+        //staat in code zelf, nice one Broos
     }
 
-    public void output(){
-        //TODO Outputstream
+    public void output() throws IOException {
+        String naam = "C:\\Users\\pepij\\OneDrive\\Master 1\\Semester 2\\Simulation\\Output_Radiology";
+        File file1 = new File(naam);
+        FileWriter fw = new FileWriter(file1);
+
+        for (int i1 = 0; i1 < nrStations; i1++) {
+            fw.write(String.format("Utilisation servers Station WS %d:\t", i1));
+            for (int i2 = 0; i2 < nrServersPerStation[i1]; i2++) {
+                double j1 = (idle[run][i1][i2] / t);
+                rhoWSS[i1][i2] = 1 - j1;
+                fw.write(String.format("%f\t", rhoWSS[i1][i2]));
+            }
+            fw.write("\n");
+        }
+        fw.write("\n");
+
+        for (int i1 = 0; i1 < nrStations; i1++) {
+            fw.write(String.format("Avg utilisation Station WS %d:\t", i1));
+            for (int i2 = 0; i2 < nrServersPerStation[i1]; i2++) {
+                rhoWS[i1] += rhoWSS[i1][i2];
+            }
+            rhoWS[i1] = rhoWS[i1] / nrServersPerStation[i1];
+            fw.write(String.format("%f\n", rhoWS[i1]));
+        }
+        fw.write("\n");
+
+        double rho = 0;
+        for (int i1 = 0; i1 < nrStations; i1++) {
+            rho += rhoWS[i1];
+        }
+        rho /= nrStations;
+        fw.write(String.format("Overall avg utilisation: %f\n", rho));
+
+        fw.write("\n");
+
+        for (int i1 = 0; i1 < N; i1++) {
+            meanServiceTime[run] += timeSystem[run][orderOut[i1]];
+        }
+        fw.write("Cycle time\n\n");
+        double j1 = meanServiceTime[run] / N;
+        fw.write(String.format("Avg cycle time: %f\n\n", j1));
+
+        meanServiceTime[run] = 0;
+        fw.write("Number\tObservation\tRunning Average\n");
+
+        for (int i1 = 0; i1 < N; i1++) {
+            meanServiceTime[run] += timeSystem[run][orderOut[i1]];
+            j1 = meanServiceTime[run] / (i1 + 1);
+            fw.write(String.format("%d\t%f\t%f\n", i1, timeSystem[run][orderOut[i1]], j1));
+        }
+        fw.close();
     }
 
-    public static void main(String[] args) {
-        // write your code here
+
+    public static void main(String[] args) throws IOException {
+        Personnel personnel = new Personnel();
+        personnel.initialize_functions();
+        personnel.procedure();
+
     }
 }
