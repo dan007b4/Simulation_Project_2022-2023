@@ -155,7 +155,7 @@ public class Personnel {
             v2 -= 1;
             t = v1 * v1 + v2 * v2;
         } while (t >= 1 || t == 0);
-        double multiplier = Math.Math.sqrt(-2 * Math.log(t) / t);
+        double multiplier = Math.sqrt(-2 * Math.log(t) / t);
         x = (int) (v1 * multiplier * stdev + mean);
         return x;
     }
@@ -183,7 +183,7 @@ public class Personnel {
         double x, L;
         mean = (a + b + c) / 3;
         stdev = (Math.pow(a, 2) + Math.pow(b, 2) + Math.pow(c, 2) - a * b - a * c - b * c) / 18;
-        stdev = Math.Math.sqrt(stdev);
+        stdev = Math.sqrt(stdev);
         Random rand = new Random();
         j1 = rand.nextDouble();
         x = a;
@@ -533,7 +533,7 @@ public class Personnel {
         indexArr = 0;                                                                  // Initialise arrival source indicator
         firstTA = infinity;
         for(i1 = 0; i1 < nrArrivalSources; i1++)                             // Get next arrival = Smallest arrival time
-        {   //printf("%lf\t", t_a[i1]);
+        {   //printf("%lf\t", tA[i1]);
             if (firstTA > tA[i1])
             {   firstTA = tA[i1];
                 indexArr = i1;
@@ -548,6 +548,187 @@ public class Personnel {
 
     }
 
+    public void radiology_system(){
+        while (nD < N)                                                         // Perform simulation until prespecified number of customers have departed
+        {
+            firstTD = infinity;                                                //Identify next departure event = The customer that leaves the soonest (=minimum departure time)
+            for (i2 = 0; i2 < nrStations; i2++)
+            {   for(i1 = 0; i1 < nrServersPerStation[i2]; i1++)      // Loop over all servers and workstations
+            {
+                if (firstTD > tD[i2][i1])
+                {   firstTD = tD[i2][i1];
+                    indexDepServer = i1;
+                    indexDepStation = i2;
+
+                }
+            }
+            }
+
+            //printf("First departure time %lf\n", firstTD);                // You may want to print the first departure time
+
+            indexArr = 0;                                                      // Identify next arrival event
+            firstTA = infinity;
+            for(i1 = 0; i1 < nrArrivalSources; i1++)
+            {   if (firstTA > tA[i1])
+            {   firstTA = tA[i1];
+                indexArr = i1;
+            }
+            }
+
+
+
+            if (tA[indexArr] < tD[indexDepStation][indexDepServer])                 // Is first event an arrival or a departure?
+            {   arrivalEvent();                                                                                // Arrival event
+            }
+            else                                                                                                        // Departure event
+            {
+                /* UPDATE STATISTICS FOR PERIOD [t,tD]*/
+                totN[run] += (tD[indexDepStation][indexDepServer] - t) * n;                                     // Update statistics: continuous time statistics to count the average number of jobs in process for specific workstation and server
+                for (i2 = 0; i2 < nrStations; i2++)
+                    totNWS[run][i2] += (tD[indexDepStation][indexDepServer] - t) * nWS[i2];         // Update statistics: continuous time statistics to count the average number of jobs in process for specific workstation
+
+
+                for (i2 = 0; i2 < nrStations; i2++)
+                {   if (nWS[i2] >= nrServersPerStation[i2])
+                {    totNQueueWS[run][i2] += (tD[indexDepStation][indexDepServer] - t) * (nWS[i2] - nrServersPerStation[i2]); totNQueue[run] += (tD[indexDepStation][indexDepServer] - t) * (nWS[i2] - nrServersPerStation[i2]);
+                }
+                }// Update statistics: continuous time statistics to count the average number of jobs in queue for specific workstation and server
+
+                // Calculate idle time servers
+                for (i2 = 0; i2 < nrStations; i2++)
+                {   for (i1 = 0; i1 < nrServersPerStation[i2]; i1++)
+                {   if (tD[i2][i1] == infinity)
+                {   idle[run][i2][i1] += (tD[indexDepStation][indexDepServer] - t);
+                }
+                }
+                }   // If no departure is planned, the workstation/server is idle (continuous time statistic)
+
+                /* Increment simulation time t = tD*/
+                t = tD[indexDepStation][indexDepServer];
+
+                timeDepartureWS[run][indexDepStation][currentCust[indexDepStation][indexDepServer]] = t;                    // Store departure time customer nD in source center
+                timeSystemJobWS[run][indexDepStation][currentCust[indexDepStation][indexDepServer]] += (t-timeArrivalWS[run][indexDepStation][currentCust[indexDepStation][indexDepServer]]);             // Calculate system time in source center of served customer
+
+                nDWS[indexDepStation]++;    // Count number of departures at a particular station
+                nWS[indexDepStation]--;      // Count number of scans at the station
+
+                currentStation[currentCust[indexDepStation][indexDepServer]]++;                                               //Selected scan should go to next station
+
+
+                for (i3 = 0; i3 < nWS[indexDepStation]+1; i3++)                                                                  // Selected customer is identified from scan list current station
+                {   if (listScan[indexDepStation][i3] == currentCust[indexDepStation][indexDepServer])
+                    break;
+                }
+
+
+                listScan[indexDepStation][i3] = -1;      // Selected customer is removed from scan list current station
+
+                for (i2 = i3; i2 < nWS[indexDepStation]; i2++)                                                                   // Scan list should be updated
+                    listScan[indexDepStation][i2] = listScan[indexDepStation][i2+1];  // Move all customers one position up
+                listScan[indexDepStation][i2] = -1;
+                //TODO fix deze lijn: printf("Departure event\tJob %d\tWorkstation %d\tServer %d\tTime %lf\tCurrent station %d of %d\tReal %d\n",currentCust[indexDepStation][indexDepServer], indexDepStation, indexDepServer, t, currentStation[currentCust[indexDepStation][indexDepServer]],nrWorkstationsPerJobType[scanType[currentCust[indexDepStation][indexDepServer]]], route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]-1]);
+
+
+
+                // Does the finished job has more tasks to be done on if route?
+                // Evaluate number of tasks done versus required number
+
+                if (currentStation[currentCust[indexDepStation][indexDepServer]] < nrWorkstationsPerJobType[scanType[currentCust[indexDepStation][indexDepServer]]])
+                { // For this customer there are still jobs to do
+                    nWS[route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]]++;   // Count number of scans at a particular workstation, defined by the route (scan type and current                                                            station)
+                    nAWS[route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]]++;// Count the number of arrivals at a particular workstation
+                    timeArrivalWS[run][route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]][currentCust[indexDepStation][indexDepServer]]=t;// Set the time of arrival at a particular workstation of a particular job
+
+
+
+                    if (nWS[route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]] <= nrServersPerStation[route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]])  // Arrival to a system where one of the servers is idle?
+                    {   for (i1 = 0; i1 < nrServersPerStation[route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]]; i1++)                      // Identify the system that was idle
+                    {   if (tD[route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]][i1] == infinity)
+                        break;
+                    }
+
+                        for (i2 = 0; i2 < nrServersPerStation[route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]]; i2++)
+                        {   if (listScan[route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]][i2] == -1)
+                            listScan[route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]][i2] = currentCust[indexDepStation][indexDepServer];
+                        }// change scan list
+
+
+
+                        //listScan[route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]][i1] = currentCust[indexDepStation][indexDepServer];// CHANGE
+
+                        tMu = normalDistribution(mu[route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]][scanType[currentCust[indexDepStation][indexDepServer]]], sigma[route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]][scanType[currentCust[indexDepStation][indexDepServer]]]);                        // Derive service time of the system that was idle determine the departure time for the newly arrived scan
+                        tMu = tMu/60;             // Change service time to an hourly basis
+                        timeService[run][route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]][currentCust[indexDepStation][indexDepServer]] = tMu;       // Store service time
+
+                        waitingTimeJobWS[run][route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]][currentCust[indexDepStation][indexDepServer]] = 0;       /* Tally a delay of 0 for this job*/
+                        /* Make a machine for this workstation busy */
+                        tD[route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]][i1] = t + tMu; totMu[run] += tMu;// Calculate departure time
+                        currentCust[route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]][i1] = currentCust[indexDepStation][indexDepServer];                                     // Track the current customer being served
+                        tD[indexDepStation][indexDepServer] = infinity;                                                // Set departure time of current station to infty
+                    }
+                    else
+                    {   listScan[route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]][nWS[route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]]-1] = currentCust[indexDepStation][indexDepServer];// Add new scan to the last place n the scan list
+
+                    }
+
+
+
+
+                }
+                else
+                {
+                    orderOut[nD] = currentCust[indexDepStation][indexDepServer];                             // Store the order in which scans leave the system
+
+                    nD++;                                                                                          // Increment the number of orders that have left the system
+
+                    n--;                                                                                            // Decrease the number of items in the system
+                    timeDeparture[run][currentCust[indexDepStation][indexDepServer]] = t;                     // Set time of departure
+                    timeSystem[run][currentCust[indexDepStation][indexDepServer]] = t-timeArrival[run][currentCust[indexDepStation][indexDepServer]];// Calculate system time
+                    //TODO zelfde als hierboven, idk waarom deze printf hier staat: printf("Job %d has left\tTime %lf\n", currentCust[indexDepStation][indexDepServer], t);
+                }
+
+
+
+
+                // Determine next scan in departure station or idle status
+                if (nWS[indexDepStation] >= nrServersPerStation[indexDepStation])
+                {   // Compute next job by calculating the waiting time: Select the job with the largest waiting time
+                    // Job with the largest waiting time = Next job on the scan list of workstation
+                    currentCust[indexDepStation][indexDepServer] = listScan[indexDepStation][nrServersPerStation[indexDepStation]-1];
+
+                    // Make idle server busy with next job and generate next departure event
+
+                    tMu = normalDistribution(mu[route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]][scanType[currentCust[indexDepStation][indexDepServer]]], sigma[route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]][scanType[currentCust[indexDepStation][indexDepServer]]]);                        // For the system that was idle determine the departure time for the newly arrived scan
+                    tMu = tMu/60;
+                    timeService[run][route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]][currentCust[indexDepStation][indexDepServer]] = tMu;           // Store service time
+                    /* Calculate the delay for this job and workstation*/
+                    waitingTimeJobWS[run][route[scanType[currentCust[indexDepStation][indexDepServer]]][currentStation[currentCust[indexDepStation][indexDepServer]]]][currentCust[indexDepStation][indexDepServer]] = t - timeArrivalWS[run][indexDepStation][currentCust[indexDepStation][indexDepServer]];
+
+
+
+                    /* Make a machine for this workstation busy */
+                    tD[indexDepStation][indexDepServer] = t + tMu;
+                    totMu[run] += tMu;
+
+                }
+                else
+                {   // Make server in this station idle
+                    tD[indexDepStation][indexDepServer] = infinity;
+
+                }
+
+
+
+            }
+        }
+
+    }
+    public void arrivalEvent(){
+
+    }
+    public void output(){
+
+    }
 
     public static void main(String[] args) {
 	// write your code here
