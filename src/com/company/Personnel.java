@@ -491,26 +491,31 @@ public class Personnel {
         var[4][1] = 0;
         var[4][2] = 3;
         var[4][3] = 5;
-        sigma[0][0] = Math.sqrt(var[0][0]);               //Processing stdev per ws and job type (WS1, J1)
-        sigma[0][1] = Math.sqrt(var[0][1]);
-        sigma[0][2] = Math.sqrt(var[0][2]);
-        sigma[0][3] = Math.sqrt(var[0][3]);
-        sigma[1][0] = Math.sqrt(var[1][0]);               //Processing stdev per ws and job type (WS2, J1)
-        sigma[1][1] = Math.sqrt(var[1][1]);
-        sigma[1][2] = Math.sqrt(var[1][2]);
-        sigma[1][3] = Math.sqrt(var[1][3]);
-        sigma[2][0] = Math.sqrt(var[2][0]);               //Processing stdev per ws and job type (WS3, J1)
-        sigma[2][1] = Math.sqrt(var[2][1]);
-        sigma[2][2] = Math.sqrt(var[2][2]);
-        sigma[2][3] = Math.sqrt(var[2][3]);
-        sigma[3][0] = Math.sqrt(var[3][0]);               //Processing stdev per ws and job type (WS4, J1)
-        sigma[3][1] = Math.sqrt(var[3][1]);
-        sigma[3][2] = Math.sqrt(var[3][2]);
-        sigma[3][3] = Math.sqrt(var[3][3]);
-        sigma[4][0] = Math.sqrt(var[4][0]);               //Processing stdev per ws and job type (WS5, J1)
-        sigma[4][1] = Math.sqrt(var[4][1]);
-        sigma[4][2] = Math.sqrt(var[4][2]);
-        sigma[4][3] = Math.sqrt(var[4][3]);
+        for (int i = 0; i < nrStations; i++) {
+            for (int j = 0; j < nrJobTypes; j++) {          //vond Broos zijn methode te groot + omslachtig
+                sigma[i][j]=Math.sqrt(var[i][j]);
+            }
+        }
+//        sigma[0][0] = Math.sqrt(var[0][0]);               //Processing stdev per ws and job type (WS1, J1)
+//        sigma[0][1] = Math.sqrt(var[0][1]);
+//        sigma[0][2] = Math.sqrt(var[0][2]);
+//        sigma[0][3] = Math.sqrt(var[0][3]);
+//        sigma[1][0] = Math.sqrt(var[1][0]);               //Processing stdev per ws and job type (WS2, J1)
+//        sigma[1][1] = Math.sqrt(var[1][1]);
+//        sigma[1][2] = Math.sqrt(var[1][2]);
+//        sigma[1][3] = Math.sqrt(var[1][3]);
+//        sigma[2][0] = Math.sqrt(var[2][0]);               //Processing stdev per ws and job type (WS3, J1)
+//        sigma[2][1] = Math.sqrt(var[2][1]);
+//        sigma[2][2] = Math.sqrt(var[2][2]);
+//        sigma[2][3] = Math.sqrt(var[2][3]);
+//        sigma[3][0] = Math.sqrt(var[3][0]);               //Processing stdev per ws and job type (WS4, J1)
+//        sigma[3][1] = Math.sqrt(var[3][1]);
+//        sigma[3][2] = Math.sqrt(var[3][2]);
+//        sigma[3][3] = Math.sqrt(var[3][3]);
+//        sigma[4][0] = Math.sqrt(var[4][0]);               //Processing stdev per ws and job type (WS5, J1)
+//        sigma[4][1] = Math.sqrt(var[4][1]);
+//        sigma[4][2] = Math.sqrt(var[4][2]);
+//        sigma[4][3] = Math.sqrt(var[4][3]);
 
 
         /* STOP CRITERION */
@@ -816,6 +821,6 @@ public class Personnel {
     }
 
     public static void main(String[] args) {
-	// write your code here
+        // write your code here
     }
 }
