@@ -724,6 +724,86 @@ public class Personnel {
 
     }
     public void arrivalEvent(){
+        /* UPDATE STATISTICS FOR PERIOD [t,tA]*/
+        totN[run] += (tA[indexArr] - t) * n;                                                     // Number of scans in system (Continuous time statistic)
+        for (i2 = 0; i2 < nrStations; i2++)
+            totNWS[run][i2] += (tA[indexArr] - t) * nWS[i2];                           // Number of scans in workstation (Continuous time statistic)
+
+        for (i2 = 0; i2 < nrStations; i2++)
+        {   if (nWS[i2] >= nrServersPerStation[i2])                                                         // Number of scans in queues
+        {    totNQueueWS[run][i2] += (tA[indexArr] - t) * (nWS[i2] - nrServersPerStation[i2]);
+            totNQueue[run] += (tA[indexArr] - t) * (nWS[i2] - nrServersPerStation[i2]);
+        }
+        }
+
+        // Calculate idle time servers
+        for (i2 = 0; i2 < nrStations; i2++)
+        {   for (i1 = 0; i1 < nrServersPerStation[i2]; i1++)
+        {   if (tD[i2][i1] == infinity)
+        {   idle[run][i2][i1] += (tA[indexArr] - t);
+        }
+        }
+        }
+
+
+        /* Increment simulation time */
+        t = tA[indexArr];
+
+
+        /* Generate the job type*/
+        Random rand = new Random();
+        double j1 = rand.nextInt(1000); // Use a random number to determine the scan type
+        j1 = (j1)/1000;
+        scanType[nA] = 0;
+        while (j1 > cumDistrScans[indexArr][scanType[nA]])     // Inversion method for discrete distribution
+            scanType[nA]++;                                                           // Determine scan type of arrival
+
+        /* Set task = 1 for this job */
+        /* Determine the station for this job*/
+        currentStation[nA] = 0;                                               // New arrival needs to go to first station
+
+
+        for (i1 = 0; i1 < nWS[route[scanType[nA]][currentStation[nA]]]; i1++)
+        {   if (listScan[route[scanType[nA]][currentStation[nA]]][i1] == -1)
+            break;
+
+        }
+        listScan[route[scanType[nA]][currentStation[nA]]][i1] = nA;//add new arrival to the scan list
+        timeArrivalWS[run][route[scanType[nA]][currentStation[nA]]][nA]=t;       // Set the time of arrival at a particular workstation of a particular job
+        if (nA <= N)
+        {   timeArrival[run][nA] = t;                                                 // store time of arrival
+        }
+
+
+        nAWS[route[scanType[nA]][currentStation[nA]]]++;                          // Count the number of arrivals at a particular workstation
+
+        nWS[route[scanType[nA]][currentStation[nA]]]++;                        // Count number of scans at a particular workstation, defined by the route (scan type and current station)
+
+        /* Are all machine busy on this station?*/
+        if (nWS[route[scanType[nA]][currentStation[nA]]] <= nrServersPerStation[route[scanType[nA]][currentStation[nA]]])  // Arrival to a system where one of the servers was idle
+        {   for (i1 = 0; i1 < nrServersPerStation[route[scanType[nA]][currentStation[nA]]]; i1++)                      // Identify the server that was idle
+        {   if (tD[route[scanType[nA]][currentStation[nA]]][i1] == infinity)
+            break;
+        }
+            tMu = normalDistribution(mu[route[scanType[nA]][currentStation[nA]]][scanType[nA]], sigma[route[scanType[nA]][currentStation[nA]]][scanType[nA]]);                                                       // For the system that was idle determine the departure time for the newly arrived scan
+            tMu = tMu/60;
+            timeService[run][route[scanType[nA]][currentStation[nA]]][nA] = tMu;
+            /* Tally a delay of 0 for this job*/
+            waitingTimeJobWS[run][route[scanType[nA]][currentStation[nA]]][nA] = 0;
+            /* Make a machine for this workstation busy */
+            tD[route[scanType[nA]][currentStation[nA]]][i1] = t + tMu; totMu[run] += tMu;
+            currentCust[route[scanType[nA]][currentStation[nA]]][i1] = nA;        // Track the current customer being served
+        }
+        //TODO nog een printf lijn printf("Arrival event\tJob %d\tSource %d\tTime %lf\tScan Type %d\n", nA, indexArr, t, scanType[nA]);
+
+        n++;                    // Increase number of jobs in system
+        nA++;                  // Increase the number of arrivals
+
+        /* Schedule next arrival*/
+        tLambda = exponentialDistribution(lambda[indexArr]);
+        tA[indexArr] = t + tLambda;
+        totLambda[run][indexArr] += tLambda;
+
 
     }
     public void output(){
