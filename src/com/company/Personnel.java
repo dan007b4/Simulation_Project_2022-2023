@@ -155,7 +155,7 @@ public class Personnel {
             v2 -= 1;
             t = v1 * v1 + v2 * v2;
         } while (t >= 1 || t == 0);
-        double multiplier = Math.sqrt(-2 * Math.log(t) / t);
+        double multiplier = Math.Math.sqrt(-2 * Math.log(t) / t);
         x = (int) (v1 * multiplier * stdev + mean);
         return x;
     }
@@ -183,7 +183,7 @@ public class Personnel {
         double x, L;
         mean = (a + b + c) / 3;
         stdev = (Math.pow(a, 2) + Math.pow(b, 2) + Math.pow(c, 2) - a * b - a * c - b * c) / 18;
-        stdev = Math.sqrt(stdev);
+        stdev = Math.Math.sqrt(stdev);
         Random rand = new Random();
         j1 = rand.nextDouble();
         x = a;
@@ -366,6 +366,186 @@ public class Personnel {
                 rhoWSS[i3][i1] = 0;
             }
         }
+    }
+
+    public Personnel() {
+    }
+
+    public void procedure(){
+        L = 1;
+        for (i3 = 0; i3 < L; i3++)                          // Count number of runs
+        {   K = 1;
+            for (run = 0; run < K; run++)                  // Count number of replications per run
+            {   init();
+                radiology_system();
+                output();
+            }
+        }
+
+        //TODO hier moet nog die outputstream komen
+
+    }
+
+    public void init(){
+        /* PUT ALL VARIABLES TO ZERO */
+
+        initialize_functions();
+
+
+        /* SET INPUT VALUES */
+
+        Random rand = new Random((long) ((i3+1)*K-run));               // Ensure you each time use a different seed to get IID replications
+
+        /* INPUT RADIOLOGY DPT */
+
+        nrStations = 5;                        // Number of workstations
+
+        nrServersPerStation[0] = 3;                     // Input number of servers per workstation
+        nrServersPerStation[1] = 2;
+        nrServersPerStation[2] = 4;
+        nrServersPerStation[3] = 3;
+        nrServersPerStation[4] = 1;
+
+        /* INPUT JOB TYPES */
+        nrJobTypes = 4;                       // Number of scans types
+        nrWorkstationsPerJobType[0] = 4;             // Number of workstations per job type
+        nrWorkstationsPerJobType[1] = 3;
+        nrWorkstationsPerJobType[2] = 5;
+        nrWorkstationsPerJobType[3] = 3;
+
+        route[0][0] = 2;                        // Route to follow for each job type (JOB = 1)
+        route[0][1] = 0;                        // Note: Workstation i in assignment corresponds to workstation i-1 in code as here we start counting from 0
+        route[0][2] = 1;
+        route[0][3] = 4;
+
+        route[1][0] = 3;                        // Route to follow for each job type (JOB = 2)
+        route[1][1] = 0;
+        route[1][2] = 2;
+
+        route[2][0] = 1;                        // Route to follow for each job type (JOB = 3)
+        route[2][1] = 4;
+        route[2][2] = 0;
+        route[2][3] = 3;
+        route[2][4] = 2;
+
+        route[3][0] = 1;                        // Route to follow for each job type (JOB = 4)
+        route[3][1] = 3;
+        route[3][2] = 4;
+
+        /* INPUT ARRIVAL PROCESS */
+        nrArrivalSources = 2;                 // Number of arrival sources
+        // Arrival from radiology department
+        lambda[0] = 1/0.25;                     // Input arrival rate = 1/mean interarrival time
+        cumDistrScans[0][0] = 0.2;                   // Distribution scans (SOURCE = 1) - Cumulative distribution
+        cumDistrScans[0][1] = 0.4;
+        cumDistrScans[0][2] = 0.5;
+        cumDistrScans[0][3] = 1;
+
+        // Arrival from other services
+        lambda[1] = 1/1;                        // Input arrival rate = 1/mean interarrival time
+        cumDistrScans[1][0] = 0;                   // Distribution scans (SOURCE = 2) - Cumulative distribution
+        cumDistrScans[1][1] = 0.4;
+        cumDistrScans[1][2] = 0.4;
+        cumDistrScans[1][3] = 1;
+
+
+        /* INPUT SERVICE PROCESS */
+
+        mu[0][0] = 12;                               //Processing time per ws and job type (WS1, J1)
+        mu[0][1] = 15;
+        mu[0][2] = 15;
+        mu[0][3] = 0;
+        mu[1][0] = 20;                               //Processing time per ws and job type (WS2, J1)
+        mu[1][1] = 0;
+        mu[1][2] = 21;
+        mu[1][3] = 18;
+        mu[2][0] = 16;                               //Processing time per ws and job type (WS3, J1)
+        mu[2][1] = 14;
+        mu[2][2] = 10;
+        mu[2][3] = 0;
+        mu[3][0] = 0;                               //Processing time per ws and job type (WS4, J1)
+        mu[3][1] = 20;
+        mu[3][2] = 24;
+        mu[3][3] = 13;
+        mu[4][0] = 25;                               //Processing time per ws and job type (WS5, J1)
+        mu[4][1] = 0;
+        mu[4][2] = 20;
+        mu[4][3] = 25;
+        var[0][0] = 2;                               //Processing variance per ws and job type (WS1, J1)
+        var[0][1] = 2;
+        var[0][2] = 3;
+        var[0][3] = 0;
+        var[1][0] = 4;                               //Processing variance per ws and job type (WS2, J1)
+        var[1][1] = 0;
+        var[1][2] = 3;
+        var[1][3] = 3;
+        var[2][0] = 4;                               //Processing variance per ws and job type (WS3, J1)
+        var[2][1] = 2;
+        var[2][2] = 1;
+        var[2][3] = 0;
+        var[3][0] = 0;                               //Processing variance per ws and job type (WS4, J1)
+        var[3][1] = 3;
+        var[3][2] = 4;
+        var[3][3] = 2;
+        var[4][0] = 5;                               //Processing variance per ws and job type (WS5, J1)
+        var[4][1] = 0;
+        var[4][2] = 3;
+        var[4][3] = 5;
+        sigma[0][0] = Math.sqrt(var[0][0]);               //Processing stdev per ws and job type (WS1, J1)
+        sigma[0][1] = Math.sqrt(var[0][1]);
+        sigma[0][2] = Math.sqrt(var[0][2]);
+        sigma[0][3] = Math.sqrt(var[0][3]);
+        sigma[1][0] = Math.sqrt(var[1][0]);               //Processing stdev per ws and job type (WS2, J1)
+        sigma[1][1] = Math.sqrt(var[1][1]);
+        sigma[1][2] = Math.sqrt(var[1][2]);
+        sigma[1][3] = Math.sqrt(var[1][3]);
+        sigma[2][0] = Math.sqrt(var[2][0]);               //Processing stdev per ws and job type (WS3, J1)
+        sigma[2][1] = Math.sqrt(var[2][1]);
+        sigma[2][2] = Math.sqrt(var[2][2]);
+        sigma[2][3] = Math.sqrt(var[2][3]);
+        sigma[3][0] = Math.sqrt(var[3][0]);               //Processing stdev per ws and job type (WS4, J1)
+        sigma[3][1] = Math.sqrt(var[3][1]);
+        sigma[3][2] = Math.sqrt(var[3][2]);
+        sigma[3][3] = Math.sqrt(var[3][3]);
+        sigma[4][0] = Math.sqrt(var[4][0]);               //Processing stdev per ws and job type (WS5, J1)
+        sigma[4][1] = Math.sqrt(var[4][1]);
+        sigma[4][2] = Math.sqrt(var[4][2]);
+        sigma[4][3] = Math.sqrt(var[4][3]);
+
+
+        /* STOP CRITERION */
+        N = 1000;                                // Number of scans
+
+        infinity = 999999999;
+
+
+        /* 3. INITIALISE SYSTEM */
+        /************************/
+
+        /* DETERMINE FIRST ARRIVAL + FIRST DEPARTURE */
+        for (i2 = 0; i2 < maxNrStations; i2++)
+        {   for (i1 = 0; i1 < maxS; i1++)
+            tD[i2][i1] =infinity;          // Put all departure times for all servers to +infty (system is idle and no departures have been scheduled yet
+        }
+
+        for (i1 = 0; i1 < nrArrivalSources; i1++)
+            tA[i1] = exponentialDistribution(lambda[i1]);                     // Generate first arrival for all sources
+        indexArr = 0;                                                                  // Initialise arrival source indicator
+        firstTA = infinity;
+        for(i1 = 0; i1 < nrArrivalSources; i1++)                             // Get next arrival = Smallest arrival time
+        {   //printf("%lf\t", t_a[i1]);
+            if (firstTA > tA[i1])
+            {   firstTA = tA[i1];
+                indexArr = i1;
+            }
+
+        }
+        //printf("\n");
+
+
+        totLambda[run][indexArr] = firstTA;                                  // Add interarrival time to the counter for calculating the average interarrival time
+
+
     }
 
 
