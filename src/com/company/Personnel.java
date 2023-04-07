@@ -806,8 +806,13 @@ public class Personnel {
 
 
     }
-    public void output(){
 
+    public void departureEvent(){
+
+    }
+
+    public void output(){
+        //TODO Outputstream
     }
 
     public static void main(String[] args) {
