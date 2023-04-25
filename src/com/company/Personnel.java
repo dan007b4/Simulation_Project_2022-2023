@@ -375,21 +375,24 @@ public class Personnel {
     }
 
     public void procedure() throws IOException {
-        L = 1;
+
+        L = 2;                                              // We have the base situation, the upgrade and the new
+        // system
         for (i3 = 0; i3 < L; i3++)                          // Count number of runs
         {   K = 1;
             for (run = 0; run < K; run++)                  // Count number of replications per run
-            {   init();
+            {   init(L);
                 radiology_system();
-                output();
+                output(L);
             }
         }
 
         //TODO hier moet nog die outputstream komen
+        
 
     }
 
-    public void init(){
+    public void init(double L) {
         /* PUT ALL VARIABLES TO ZERO */
 
         initialize_functions();
@@ -470,10 +473,32 @@ public class Personnel {
         mu[3][1] = 20;
         mu[3][2] = 24;
         mu[3][3] = 13;
-        mu[4][0] = 25;                               //Processing time per ws and job type (WS5, J1)
-        mu[4][1] = 0;
-        mu[4][2] = 20;
-        mu[4][3] = 25;
+
+        if (L==0) {
+
+            mu[4][0] = 25;                             //Processing time per ws and job type (WS5, J1) / Base situation
+            mu[4][1] = 0;
+            mu[4][2] = 20;
+            mu[4][3] = 25;
+
+        } else if (L==1) {
+
+            mu[4][0] = 20;                             //Upgrade
+            mu[4][1] = 0;
+            mu[4][2] = 20;
+            mu[4][3] = 20;
+
+        } else if (L==2) {
+
+            mu[4][0] = 17;                               //New workstation
+            mu[4][1] = 0;
+            mu[4][2] = 15;
+            mu[4][3] = 16;
+
+        }
+
+
+
         var[0][0] = 2;                               //Processing variance per ws and job type (WS1, J1)
         var[0][1] = 2;
         var[0][2] = 3;
@@ -490,10 +515,22 @@ public class Personnel {
         var[3][1] = 3;
         var[3][2] = 4;
         var[3][3] = 2;
-        var[4][0] = 5;                               //Processing variance per ws and job type (WS5, J1)
-        var[4][1] = 0;
-        var[4][2] = 3;
-        var[4][3] = 5;
+        if (L==2) {
+
+            var[4][0] = 4;                              //Processing variance per ws and job type (WS5, J1) / New system
+            var[4][1] = 0;
+            var[4][2] = 3;
+            var[4][3] = 4;
+
+        } else {
+
+            var[4][0] = 5;                               // Other processes
+            var[4][1] = 0;
+            var[4][2] = 3;
+            var[4][3] = 5;
+
+        }
+
         for (int i = 0; i < nrStations; i++) {
             for (int j = 0; j < nrJobTypes; j++) {          //vond Broos zijn methode te groot + omslachtig
                 sigma[i][j]=Math.sqrt(var[i][j]);
@@ -819,8 +856,20 @@ public class Personnel {
         //staat in code zelf, nice one Broos
     }
 
-    public void output() throws IOException {
-        String naam = "C:\\Users\\pepij\\OneDrive\\Master 1\\Semester 2\\Simulation\\Output_Radiology";
+    public void output(double L) throws IOException {
+        //String naam = "C:\\Users\\pepij\\OneDrive\\Master 1\\Semester 2\\Simulation\\Output_Radiology";
+        String naam = "";
+        if (L==0) {
+            naam = "/Users/danielekhorugue/Desktop/Simulation/Base_Output.txt";
+        } else if (L==1) {
+
+            naam = "/Users/danielekhorugue/Desktop/Simulation/Upgrade_Output.txt";
+        } else if (L==2) {
+
+            naam = "/Users/danielekhorugue/Desktop/Simulation/New_System_Output.txt";
+        }
+
+
         File file1 = new File(naam);
         FileWriter fw = new FileWriter(file1);
 
