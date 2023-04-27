@@ -14,12 +14,12 @@ public class Personnel {
     private static int maxNrStations = 10; // max number of stations
     private static int maxNrJobTypes = 10; // max number of job types
     private static Random rand;
-    private int RandCounter=0;
+    private int RandCounterA,RandCounterB,RandCounterC,RandCounterD,RandCounterE,RandCounterF,RandCounterG,RandCounterH;
 
     /* COUNTER */
     private double j1, j2, j3, l1; // define float numbers
     private int i1, i2, i6, run, i3;  // define counters (integers)
-    private double K, s0, Updates;
+    private double K, s0, updates;
     private double[] avg = new double[30];
     private char[] naam = new char[300];
     private char[] sProblem = new char[10];
@@ -117,8 +117,8 @@ public class Personnel {
     public double exponentialDistribution(double lambda) {
 
         //Random rand = new Random();
-        j1 = numbers[RandCounter]; // Random number
-        RandCounter++;
+        j1 = numbers[RandCounterA]; // Random number
+        RandCounterA++;
         if (j1 == 0) { // Random number should lie in interval ]0,1[
             j1 += 0.0001;
         }
@@ -130,8 +130,8 @@ public class Personnel {
         //Random rand = new Random();
         double k, L;
         int p;
-        j1 = numbers[RandCounter]; // Random number
-        RandCounter++;
+        j1 = numbers[RandCounterB]; // Random number
+        RandCounterB++;
         k = 0;
         L = Math.exp(-lambda);
         j3 = 0;
@@ -157,11 +157,11 @@ public class Personnel {
         double v1, v2, t;
         int x;
         do {
-            v1 = numbers[RandCounter]*2; // Random number
-            RandCounter++;
+            v1 = numbers[RandCounterC]*2; // Random number
+            RandCounterC++;
             v1 -= 1;
-            v2 = numbers[RandCounter]*2; // Random number
-            RandCounter++;
+            v2 = numbers[RandCounterD]*2; // Random number
+            RandCounterD++;
             v2 -= 1;
             t = v1 * v1 + v2 * v2;
         } while (t >= 1 || t == 0);
@@ -172,8 +172,8 @@ public class Personnel {
 
     public int bernouilliDistribution(double prob) {
         //Random rand = new Random();
-        j1 = numbers[RandCounter]; // Random number
-        RandCounter++; // random number
+        j1 = numbers[RandCounterE]; // Random number
+        RandCounterE++; // random number
         if (j1 < prob) { // Inversion method
             return 0;
         } else {
@@ -184,8 +184,8 @@ public class Personnel {
     public int uniformDistribution(double a, double b) {
         //Random rand = new Random();
         int x;
-        j1 = numbers[RandCounter]; // Random number
-        RandCounter++; // random number
+        j1 = numbers[RandCounterF]; // Random number
+        RandCounterF++; // random number
         x = (int) (a + (b-a) * j1); // Inversion method
         return x;
     }
@@ -197,8 +197,8 @@ public class Personnel {
         stdev = (Math.pow(a, 2) + Math.pow(b, 2) + Math.pow(c, 2) - a * b - a * c - b * c) / 18;
         stdev = Math.sqrt(stdev);
         //Random rand = new Random();
-        j1 = numbers[RandCounter]; // Random number
-        RandCounter++;
+        j1 = numbers[RandCounterG]; // Random number
+        RandCounterG++;
         x = a;
         do {
             if (x <= b) {
@@ -214,6 +214,14 @@ public class Personnel {
     public void initialize_functions(){
 
         /* PUT ALL VARIABLES TO ZERO */
+        RandCounterA=0;
+        RandCounterB=100000;
+        RandCounterC=200000;
+        RandCounterD=300000;
+        RandCounterE=400000;
+        RandCounterF=500000;
+        RandCounterG=600000;
+        RandCounterH=700000;
 
         /* INPUT DATA RELATED TO RADIOLOGY DPT */
         nrStations = 0;
@@ -384,25 +392,24 @@ public class Personnel {
     public Personnel() {
     }
 
-    double[] numbers = new double[100000];
+    double[] numbers = new double[1000000];
 
     public void CommonRandomNumbers(long seed){
         rand = new Random((long) ((seed)));
-        for (int i = 0; i < 100000; i++) {
+        for (int i = 0; i < 1000000; i++) {
             numbers[i] = rand.nextDouble();
         }
 
     }
 
     public void procedure() throws IOException {
-        Updates = 3;              //3 Different: Current, Upgrade en New system
+        updates = 3;              //3 Different: Current, Upgrade en New system
         //L = 0 (Current)
         //L = 1 (Upgrade)
         //L = 2 (New system)
+        CommonRandomNumbers(307);
 
-        CommonRandomNumbers(123);
-
-        for (int i4 = 0; i4 < Updates; i4++)                          // Count number of runs
+        for (int i4 = 0; i4 < updates; i4++)                          // Count number of runs
         {   K = 1;
             for (run = 0; run < K; run++)                  // Count number of replications per run
             {   init(i4);
@@ -417,7 +424,6 @@ public class Personnel {
         /* PUT ALL VARIABLES TO ZERO */
 
         initialize_functions();
-        RandCounter=0;
 
 
         /* SET INPUT VALUES */
@@ -814,8 +820,8 @@ public class Personnel {
 
 
         /* Generate the job type*/
-        j1 = numbers[RandCounter]; // Random number
-        RandCounter++;
+        j1 = numbers[RandCounterH]; // Random number
+        RandCounterH++;
         scanType[nA] = 0;
         while (j1 > cumDistrScans[indexArr][scanType[nA]])     // Inversion method for discrete distribution
             scanType[nA]++;                                                           // Determine scan type of arrival
@@ -873,10 +879,11 @@ public class Personnel {
         //staat in code zelf, nice one Broos
     }
 
-    public void output(int Updates) throws IOException {
-        String naam = "/Users/danielekhorugue/Desktop/Simulation/out" + Updates + ".txt";
-        //String naam = "C:\\Users\\elide\\OneDrive - UGent\\Handelsingenieur\\1e Master\\Simulation Modelling And " +
-                //"Analysis\\Simulation_Project_2022-2023\\out" + Policy;
+    public void output(int updates) throws IOException {
+        //String naam = "C:\\Users\\pepij\\OneDrive\\Master 1\\Semester " +
+        //"2\\Simulation\\Simulation_Project_2022-2023\\out\\Output Deel 1\\Run_25\\Policy_" + Policy;
+        //String naam = "C:\\Users\\elide\\OneDrive - UGent\\Handelsingenieur\\1e Master\\Simulation Modelling And Analysis\\Simulation_Project_2022-2023\\out\\Output Deel 1\\Run_1\\Output_" + Policy;
+        String naam = "/Users/danielekhorugue/Desktop/Simulation/out" + updates + ".txt";
         File file1 = new File(naam);
         FileWriter fw = new FileWriter(file1);
 
