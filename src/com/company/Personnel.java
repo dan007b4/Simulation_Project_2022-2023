@@ -407,20 +407,21 @@ public class Personnel {
         //L = 0 (Current)
         //L = 1 (Upgrade)
         //L = 2 (New system)
-        CommonRandomNumbers(307);
+        //CommonRandomNumbers(200);
 
-        for (int i4 = 0; i4 < updates; i4++)                          // Count number of runs
-        {   K = 1;
-            for (run = 0; run < K; run++)                  // Count number of replications per run
-            {   init(i4);
+        for (int i4 = 200; i4 <= 210; i4++)                          // Count number of runs
+        {
+            CommonRandomNumbers(i4);
+            for (run = 0; run < updates; run++)                  // Count number of replications per run
+            {   init(i4, run);
                 radiology_system();
-                output(i4);
+                output(i4, run);
             }
         }
 
     }
 
-    public void init(int L){
+    public void init(int seed, double updates){
         /* PUT ALL VARIABLES TO ZERO */
 
         initialize_functions();
@@ -502,21 +503,21 @@ public class Personnel {
         mu[3][1] = 20;
         mu[3][2] = 24;
         mu[3][3] = 13;
-        if (L==0) {
+        if (updates==0) {
 
             mu[4][0] = 25;                             //Processing time per ws and job type (WS5, J1) / Base situation
             mu[4][1] = 0;
             mu[4][2] = 20;
             mu[4][3] = 25;
 
-        } else if (L==1) {
+        } else if (updates==1) {
 
             mu[4][0] = 20;                             //Upgrade
             mu[4][1] = 0;
             mu[4][2] = 20;
             mu[4][3] = 20;
 
-        } else if (L==2) {
+        } else if (updates==2) {
 
             mu[4][0] = 17;                               //New system
             mu[4][1] = 0;
@@ -540,7 +541,7 @@ public class Personnel {
         var[3][1] = 3;
         var[3][2] = 4;
         var[3][3] = 2;
-        if (L==2) {
+        if (updates==2) {
 
             var[4][0] = 4;                              //Processing variance per ws and job type (WS5, J1) / New system
             var[4][1] = 0;
@@ -879,11 +880,11 @@ public class Personnel {
         //staat in code zelf, nice one Broos
     }
 
-    public void output(int updates) throws IOException {
+    public void output(int seed, double updates) throws IOException {
         //String naam = "C:\\Users\\pepij\\OneDrive\\Master 1\\Semester " +
         //"2\\Simulation\\Simulation_Project_2022-2023\\out\\Output Deel 1\\Run_25\\Policy_" + Policy;
         //String naam = "C:\\Users\\elide\\OneDrive - UGent\\Handelsingenieur\\1e Master\\Simulation Modelling And Analysis\\Simulation_Project_2022-2023\\out\\Output Deel 1\\Run_1\\Output_" + Policy;
-        String naam = "/Users/danielekhorugue/Desktop/Simulation/out" + updates + ".txt";
+        String naam = "/Users/danielekhorugue/Desktop/Simulation/out" + seed + "_" + updates + ".txt";
         File file1 = new File(naam);
         FileWriter fw = new FileWriter(file1);
 
